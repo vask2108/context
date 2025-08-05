@@ -136,6 +136,14 @@ message(STATUS "Boost.Context: "
   "suffix ${BOOST_CONTEXT_ASM_SUFFIX}, "
   "implementation ${BOOST_CONTEXT_IMPLEMENTATION}")
 
+message(STATUS "MSVC=${MSVC}")
+message(STATUS "CMAKE_C_COMPILER=${CMAKE_C_COMPILER}")
+message(STATUS "CMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}")
+message(STATUS "CMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}")
+message(STATUS "CMAKE_CXX_COMPILER_ID=${CMAKE_CXX_COMPILER_ID}")
+message(STATUS "CMAKE_SYSTEM_PROCESSOR=${CMAKE_SYSTEM_PROCESSOR}")
+message(STATUS "CMAKE_SIZEOF_VOID_P=${CMAKE_SIZEOF_VOID_P}")
+
 # Enable the right assembler
 set(ASM_LANGUAGE)
 if(BOOST_CONTEXT_IMPLEMENTATION STREQUAL "fcontext")
@@ -146,11 +154,23 @@ if(BOOST_CONTEXT_IMPLEMENTATION STREQUAL "fcontext")
       set(ASM_LANGUAGE ASM)
     endif()
   elseif(BOOST_CONTEXT_ASSEMBLER STREQUAL armasm)
-    set(ASM_LANGUAGE ASM_ARMASM)
+    if((DEFINED CMAKE_C_COMPILER_ID AND CMAKE_C_COMPILER_ID STREQUAL "MSVC") OR
+       (DEFINED CMAKE_CXX_COMPILER_ID AND CMAKE_CXX_COMPILER_ID STREQUAL "MSVC"))
+        message("setting ASM_MARMASM")
+        set(ASM_LANGUAGE ASM_MARMASM)
+    else()
+        message("setting ASM_ARMASM")
+        set(ASM_LANGUAGE ASM_ARMASM)
+    endif()
   else()
     set(ASM_LANGUAGE ASM_MASM)
   endif()
 endif()
+
+if(ASM_LANGUAGE)
+    enable_language(${ASM_LANGUAGE})
+endif()
+
 
 # Choose .asm sources
 
